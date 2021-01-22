@@ -19,7 +19,7 @@ namespace BrickworksAssignment
                         bool checkd = false;
                         if (seenNumbers.Contains(array[i, j])) throw new Exception("Number encountered more than 2 times");
                         checkedSquares[i, j] = true;
-                        //check right
+                        //check horizontal
                         if(j + 1 < array.GetLength(1))
                             if (array[i, j] == array[i, j + 1])
                             {
@@ -27,7 +27,7 @@ namespace BrickworksAssignment
                                 seenNumbers.Add(array[i,j]);
                                 checkd = true;
                             }
-                        //check down
+                        //check vertical
                         if(i + 1 < array.GetLength(0) && !checkd)
                             if (array[i, j] == array[i + 1, j]) //runs this check only if the first has failed
                             {
@@ -50,8 +50,43 @@ namespace BrickworksAssignment
         }
         static int[,] createSecondLayer(int[,] firstLayer)
         {
-            return firstLayer;
+            int[,] secondlayer = new int[firstLayer.GetLength(0), firstLayer.GetLength(1)];
+            int currentnumber = 1;
+            for (int i = 0; i < firstLayer.GetLength(0); i++)
+            {
+                for (int j = 0; j < firstLayer.GetLength(1); j++)
+                {
+                    if (secondlayer[i, j] == 0)
+                    {
+                        bool brickplaced = false;
+                        if (j + 1 < firstLayer.GetLength(1))
+                        {
+                            if (firstLayer[i, j] != firstLayer[i, j + 1]) // if there is horizontal division place a brick
+                            {
+                                secondlayer[i, j] = currentnumber;
+                                secondlayer[i, j + 1] = currentnumber;
+                                currentnumber++;
+                                brickplaced = true;
+                            }
+                        }
+                        if (i + 1 < firstLayer.GetLength(0) && !brickplaced)
+                        {
+                            if (firstLayer[i, j] != firstLayer[i + 1, j]) //if there is vertical division place a brick
+                            {
+                                secondlayer[i, j] = currentnumber;
+                                secondlayer[i + 1, j] = currentnumber;
+                                currentnumber++;
+                            }
+                        }
+                    }
+                }
+            }
+            return secondlayer;
+
+            //horizontal bricks -> move horizontally or rotate
+            //vertical bricks -> move vertically or rotate
         }
+
         static void Main(string[] args)
         {
             int[] dimension = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
@@ -66,6 +101,8 @@ namespace BrickworksAssignment
             }
             printArray(bricks);
             inputValidator(bricks);
+            Console.WriteLine();
+            printArray(createSecondLayer(bricks));
         }
     }
 }
