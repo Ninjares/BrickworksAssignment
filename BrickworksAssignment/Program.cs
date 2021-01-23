@@ -34,7 +34,7 @@ namespace BrickworksAssignment
                                 checkedSquares[i + 1, j] = true;
                                 seenNumbers.Add(array[i, j]);
                             }
-                        else throw new Exception("something ain't right"); //Both checks have failed
+                        else throw new Exception("Something ain't right"); //Both checks have failed
                     }
                 }
             }
@@ -81,10 +81,56 @@ namespace BrickworksAssignment
                     }
                 }
             }
-            return secondlayer;
+            return secondlayer; //consider recursion
+        }
 
-            //horizontal bricks -> move horizontally or rotate
-            //vertical bricks -> move vertically or rotate
+        static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
+        {
+            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber);
+            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) return secondlayer;
+            if (secondlayer[i, j] == 0)
+            {
+                bool brickplaced = false;
+                if (j + 1 < firstLayer.GetLength(1)) //am I not at the end
+                {
+                    if (firstLayer[i, j] != firstLayer[i, j + 1]) // can I place a horizontal brick
+                    {
+                        secondlayer[i, j] = currentnumber;
+                        secondlayer[i, j + 1] = currentnumber;
+                        currentnumber++;
+                        brickplaced = true;
+                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                        if (result.Cast<int>().Contains(0))
+                        {
+                            secondlayer[i, j] = 0;
+                            secondlayer[i, j + 1] = 0;
+                            currentnumber--;
+                            brickplaced = false;
+                        }
+                    }
+                    else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+
+                }
+                if (i + 1 < firstLayer.GetLength(0) && !brickplaced) // am I at the bottom
+                {
+                    if (firstLayer[i, j] != firstLayer[i + 1, j]) //can I place a vertical brick
+                    {
+                        secondlayer[i, j] = currentnumber;
+                        secondlayer[i + 1, j] = currentnumber;
+                        currentnumber++;
+                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                        if (result.Cast<int>().Contains(0))
+                        {
+                            return new int[1, 1] { { -1 } };
+                        }
+
+                    }
+                    else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                }
+                return secondlayer;
+            }
+            else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+
         }
 
         static void Main(string[] args)
@@ -99,10 +145,20 @@ namespace BrickworksAssignment
                 int[] line = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
                 for (int j = 0; j < n; j++) bricks[i, j] = line[j];
             }
-            printArray(bricks);
+            //printArray(bricks);
             inputValidator(bricks);
             Console.WriteLine();
-            printArray(createSecondLayer(bricks));
+            int[,] secondLayer1 = createSecondLayer(bricks);
+            int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
+            if (secondLayer1.Cast<int>().Contains(0)) //if the second layer contains a 0 that means a brick could not be placed without overlapping
+            {
+                printArray(secondLayer1);
+                Console.WriteLine(-1);
+            }
+            else printArray(secondLayer1);
+            Console.WriteLine();
+            printArray(secondLayer2);
+           
         }
     }
 }
