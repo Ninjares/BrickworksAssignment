@@ -40,14 +40,6 @@ namespace BrickworksAssignment
             }
             return true;
         }
-        static void printArray(int[,] array)
-        {
-            for(int i=0; i<array.GetLength(0); i++)
-            {
-                for (int j = 0; j < array.GetLength(1); j++)
-                    Console.Write(j == array.GetLength(1) - 1 ? $"{array[i, j]}\n" : $"{array[i, j]} ");
-            }
-        }
         static void drawLayer(int[,] array)
         {
             for (int i = 0; i < array.GetLength(0); i++)
@@ -73,13 +65,13 @@ namespace BrickworksAssignment
                             int a = array[i - 1, j - 1];
                             int b = array[i - 1, j];
                             int c = array[i, j - 1];
-                            if (a == b && c == x && c!=a && x!=b) Console.Write("═══");
-                            if (a == c && b == x && a!=b && c!=x) Console.Write("║--");
-                            if (a != b && b != x && c!=x && c!=a) Console.Write("╬══");
-                            if (a != c && b == x && b!=a && c!=x) Console.Write("╣--");
-                            if (a == c && b != x && a!=b && c!=x) Console.Write("╠══");
-                            if (a != b && c == x && a!=c && b!=x) Console.Write("╩══");
-                            if (a == b && c != x && a!=c && b!=x) Console.Write("╦══");
+                            if (a == b && c == x && c != a && x != b) Console.Write("═══");
+                            if (a != b && c != x && c == a && x == b) Console.Write("║--");
+                            if (a != b && c != x && c != a && x != b) Console.Write("╬══");
+                            if (a != b && c != x && c != a && x == b) Console.Write("╣--");
+                            if (a != b && c != x && c == a && x != b) Console.Write("╠══");
+                            if (a != b && c == x && c != a && x != b) Console.Write("╩══");
+                            if (a == b && c != x && c != a && b != x) Console.Write("╦══");
 
                         }
                     }
@@ -110,54 +102,20 @@ namespace BrickworksAssignment
             }
             Console.WriteLine("╝");
         }
-        static int[,] createSecondLayer(int[,] firstLayer)
-        {
-            int[,] secondlayer = new int[firstLayer.GetLength(0), firstLayer.GetLength(1)];
-            int currentnumber = 1;
-            for (int i = 0; i < firstLayer.GetLength(0); i++)
-            {
-                for (int j = 0; j < firstLayer.GetLength(1); j++)
-                {
-                    if (secondlayer[i, j] == 0)
-                    {
-                        bool brickplaced = false;
-                        if (j + 1 < firstLayer.GetLength(1))
-                        {
-                            if (firstLayer[i, j] != firstLayer[i, j + 1])
-                            {
-                                secondlayer[i, j] = currentnumber;
-                                secondlayer[i, j + 1] = currentnumber;
-                                currentnumber++;
-                                brickplaced = true;
-                            }
-                        }
-                        if (i + 1 < firstLayer.GetLength(0) && !brickplaced)
-                        {
-                            if (firstLayer[i, j] != firstLayer[i + 1, j])
-                            {
-                                secondlayer[i, j] = currentnumber;
-                                secondlayer[i + 1, j] = currentnumber;
-                                currentnumber++;
-                            }
-                        }
-                    }
-                }
-            }
-            return secondlayer; 
-        }
+        
 
         static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
         {
-            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber); //next row
-            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) { return secondlayer; }// return work
+            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber); 
+            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) return secondlayer; 
             
 
             if (secondlayer[i, j] == 0)
             {
                 bool horizontalTried = false;
-                if (j + 1 < firstLayer.GetLength(1)) //am I not at the end
+                if (j + 1 < firstLayer.GetLength(1)) 
                 {
-                    if (firstLayer[i, j] != firstLayer[i, j + 1]) // can I place a horizontal brick
+                    if (firstLayer[i, j] != firstLayer[i, j + 1]) 
                     {
                         secondlayer[i, j] = currentnumber;
                         secondlayer[i, j + 1] = currentnumber;
@@ -211,18 +169,66 @@ namespace BrickworksAssignment
                 int[] line = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
                 for (int j = 0; j < n; j++) bricks[i, j] = line[j];
             }
-            //printArray(bricks);
             inputValidator(bricks);
             Console.WriteLine();
             drawLayer(bricks);
             int[,] secondLayer1 = createSecondLayer(bricks);
             int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
-            if (secondLayer2.Cast<int>().Contains(0)) //if the second layer contains a 0 that means a brick could not be placed without overlapping
+            if (secondLayer2.Cast<int>().Contains(0))
             {
                 Console.WriteLine(-1);
             }
             else drawLayer(secondLayer2);
            
+        }
+
+
+
+
+        //DepricatedMethods
+
+        static void printArray(int[,] array)
+        {
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                for (int j = 0; j < array.GetLength(1); j++)
+                    Console.Write(j == array.GetLength(1) - 1 ? $"{array[i, j]}\n" : $"{array[i, j]} ");
+            }
+        }
+        static int[,] createSecondLayer(int[,] firstLayer)
+        {
+            int[,] secondlayer = new int[firstLayer.GetLength(0), firstLayer.GetLength(1)];
+            int currentnumber = 1;
+            for (int i = 0; i < firstLayer.GetLength(0); i++)
+            {
+                for (int j = 0; j < firstLayer.GetLength(1); j++)
+                {
+                    if (secondlayer[i, j] == 0)
+                    {
+                        bool brickplaced = false;
+                        if (j + 1 < firstLayer.GetLength(1))
+                        {
+                            if (firstLayer[i, j] != firstLayer[i, j + 1])
+                            {
+                                secondlayer[i, j] = currentnumber;
+                                secondlayer[i, j + 1] = currentnumber;
+                                currentnumber++;
+                                brickplaced = true;
+                            }
+                        }
+                        if (i + 1 < firstLayer.GetLength(0) && !brickplaced)
+                        {
+                            if (firstLayer[i, j] != firstLayer[i + 1, j])
+                            {
+                                secondlayer[i, j] = currentnumber;
+                                secondlayer[i + 1, j] = currentnumber;
+                                currentnumber++;
+                            }
+                        }
+                    }
+                }
+            }
+            return secondlayer;
         }
     }
 }
