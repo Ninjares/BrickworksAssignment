@@ -48,6 +48,68 @@ namespace BrickworksAssignment
                     Console.Write(j == array.GetLength(1) - 1 ? $"{array[i, j]}\n" : $"{array[i, j]} ");
             }
         }
+        static void drawLayer(int[,] array)
+        {
+            for (int i = 0; i < array.GetLength(0); i++)
+            {
+                for (int j = 0; j < array.GetLength(1); j++)
+                {
+                    if (i == 0)
+                    {
+                        if (j == 0) Console.Write("╔══");
+                        else
+                        {
+                            if (array[i, j] == array[i, j - 1]) Console.Write("═══");
+                            else Console.Write("╦══");
+                        }
+                    }
+                    else
+                    {
+                        if (j == 0)
+                            if (array[i, j] == array[i - 1, j]) Console.Write("║--"); else Console.Write("╠══");
+                        else
+                        {
+                            int x = array[i, j];
+                            int a = array[i - 1, j - 1];
+                            int b = array[i - 1, j];
+                            int c = array[i, j - 1];
+                            if (a == b && c == x && c!=a && x!=b) Console.Write("═══");
+                            if (a == c && b == x && a!=b && c!=x) Console.Write("║--");
+                            if (a != b && b != x && c!=x && c!=a) Console.Write("╬══");
+                            if (a != c && b == x && b!=a && c!=x) Console.Write("╣--");
+                            if (a == c && b != x && a!=b && c!=x) Console.Write("╠══");
+                            if (a != b && c == x && a!=c && b!=x) Console.Write("╩══");
+                            if (a == b && c != x && a!=c && b!=x) Console.Write("╦══");
+
+                        }
+                    }
+                }
+                if (i == 0) Console.WriteLine("╗"); else if (array[i, array.GetLength(1)-1] == array[i - 1, array.GetLength(1)-1]) Console.WriteLine("║"); else Console.WriteLine("╣");
+                for (int j = 0; j < array.GetLength(1); j++)
+                {
+                    if (j == 0)
+                    {
+                        Console.Write($"║{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
+                    }
+                    else
+                    {
+                        if(array[i,j-1] == array[i,j]) Console.Write($"|{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
+                        else Console.Write($"║{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
+                    }
+                }
+                Console.WriteLine("║");
+            }
+            for(int j=0; j<array.GetLength(1); j++)
+            {
+                if (j == 0) Console.Write("╚══");
+                else
+                {
+                    if (array[array.GetLength(0) - 1, j] == array[array.GetLength(0) - 1, j - 1]) Console.Write("═══");
+                    else Console.Write("╩══");
+                }
+            }
+            Console.WriteLine("╝");
+        }
         static int[,] createSecondLayer(int[,] firstLayer)
         {
             int[,] secondlayer = new int[firstLayer.GetLength(0), firstLayer.GetLength(1)];
@@ -81,7 +143,7 @@ namespace BrickworksAssignment
                     }
                 }
             }
-            return secondlayer; //consider recursion
+            return secondlayer; 
         }
 
         static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
@@ -101,7 +163,7 @@ namespace BrickworksAssignment
                         secondlayer[i, j + 1] = currentnumber;
                         currentnumber++;
                         int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-                        if (result.Cast<int>().Contains(0) || result[0,0]==-1)
+                        if (result.Cast<int>().Contains(0))
                         {
                             
                                 secondlayer[i, j] = 0;
@@ -152,13 +214,14 @@ namespace BrickworksAssignment
             //printArray(bricks);
             inputValidator(bricks);
             Console.WriteLine();
+            drawLayer(bricks);
             int[,] secondLayer1 = createSecondLayer(bricks);
             int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
             if (secondLayer2.Cast<int>().Contains(0)) //if the second layer contains a 0 that means a brick could not be placed without overlapping
             {
                 Console.WriteLine(-1);
             }
-            else printArray(secondLayer2);
+            else drawLayer(secondLayer2);
            
         }
     }
