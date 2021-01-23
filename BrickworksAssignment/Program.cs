@@ -61,7 +61,7 @@ namespace BrickworksAssignment
                         bool brickplaced = false;
                         if (j + 1 < firstLayer.GetLength(1))
                         {
-                            if (firstLayer[i, j] != firstLayer[i, j + 1]) // if there is horizontal division place a brick
+                            if (firstLayer[i, j] != firstLayer[i, j + 1])
                             {
                                 secondlayer[i, j] = currentnumber;
                                 secondlayer[i, j + 1] = currentnumber;
@@ -71,7 +71,7 @@ namespace BrickworksAssignment
                         }
                         if (i + 1 < firstLayer.GetLength(0) && !brickplaced)
                         {
-                            if (firstLayer[i, j] != firstLayer[i + 1, j]) //if there is vertical division place a brick
+                            if (firstLayer[i, j] != firstLayer[i + 1, j])
                             {
                                 secondlayer[i, j] = currentnumber;
                                 secondlayer[i + 1, j] = currentnumber;
@@ -86,11 +86,13 @@ namespace BrickworksAssignment
 
         static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
         {
-            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber);
-            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) return secondlayer;
+            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber); //next row
+            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) { return secondlayer; }// return work
+            
+
             if (secondlayer[i, j] == 0)
             {
-                bool brickplaced = false;
+                bool horizontalTried = false;
                 if (j + 1 < firstLayer.GetLength(1)) //am I not at the end
                 {
                     if (firstLayer[i, j] != firstLayer[i, j + 1]) // can I place a horizontal brick
@@ -98,22 +100,23 @@ namespace BrickworksAssignment
                         secondlayer[i, j] = currentnumber;
                         secondlayer[i, j + 1] = currentnumber;
                         currentnumber++;
-                        brickplaced = true;
                         int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-                        if (result.Cast<int>().Contains(0))
+                        if (result.Cast<int>().Contains(0) || result[0,0]==-1)
                         {
-                            secondlayer[i, j] = 0;
-                            secondlayer[i, j + 1] = 0;
-                            currentnumber--;
-                            brickplaced = false;
+                            
+                                secondlayer[i, j] = 0;
+                                secondlayer[i, j + 1] = 0;
+                                currentnumber--;
+                                horizontalTried = true;
+                            
                         }
-                    }
-                    else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                        else return result;
+                    } else horizontalTried = true;
+                } else horizontalTried = true;
 
-                }
-                if (i + 1 < firstLayer.GetLength(0) && !brickplaced) // am I at the bottom
+                if (i + 1 < firstLayer.GetLength(0) && horizontalTried)
                 {
-                    if (firstLayer[i, j] != firstLayer[i + 1, j]) //can I place a vertical brick
+                    if (firstLayer[i, j] != firstLayer[i + 1, j])
                     {
                         secondlayer[i, j] = currentnumber;
                         secondlayer[i + 1, j] = currentnumber;
@@ -121,13 +124,14 @@ namespace BrickworksAssignment
                         int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
                         if (result.Cast<int>().Contains(0))
                         {
-                            return new int[1, 1] { { -1 } };
+                            secondlayer[i, j] = 0;
+                            secondlayer[i + 1, j] = 0;
                         }
-
+                        return result;
                     }
                     else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
                 }
-                return secondlayer;
+                else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
             }
             else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
 
@@ -150,14 +154,11 @@ namespace BrickworksAssignment
             Console.WriteLine();
             int[,] secondLayer1 = createSecondLayer(bricks);
             int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
-            if (secondLayer1.Cast<int>().Contains(0)) //if the second layer contains a 0 that means a brick could not be placed without overlapping
+            if (secondLayer2.Cast<int>().Contains(0)) //if the second layer contains a 0 that means a brick could not be placed without overlapping
             {
-                printArray(secondLayer1);
                 Console.WriteLine(-1);
             }
-            else printArray(secondLayer1);
-            Console.WriteLine();
-            printArray(secondLayer2);
+            else printArray(secondLayer2);
            
         }
     }
