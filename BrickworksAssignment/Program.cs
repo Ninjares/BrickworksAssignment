@@ -6,14 +6,107 @@ namespace BrickworksAssignment
 {
     class Program
     {
+        static void Main(string[] args)
+        {
+            try 
+            { 
+                int[] dimension = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
+                if(dimension.Length>2) throw new IndexOutOfRangeException();
+                int m = dimension[0];
+                int n = dimension[1];
+
+                if (m < 1 || m > 100 || n < 1 || m > 100) throw new IndexOutOfRangeException();
+                int[,] bricks = new int[m, n];
+
+                for (int i = 0; i < m; i++)
+                {
+                    int[] line = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
+                    if (line.Length > n) throw new IndexOutOfRangeException();
+                    for (int j = 0; j < n; j++) bricks[i, j] = line[j];
+                }
+
+                inputValidator(bricks);
+
+                Console.WriteLine();
+
+                drawLayer(bricks);
+
+                int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
+                if (secondLayer2.Cast<int>().Contains(0))
+                {
+                    Console.WriteLine(-1);
+                }
+                else drawLayer(secondLayer2);
+            }
+            catch (Exception wrong)
+            {
+                Console.WriteLine(wrong.Message);
+            }
+
+        }
+
+        static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
+        {
+            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber);
+            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) return secondlayer;
+
+
+            if (secondlayer[i, j] == 0)
+            {
+                bool horizontalTried = false;
+                if (j + 1 < firstLayer.GetLength(1))
+                {
+                    if (firstLayer[i, j] != firstLayer[i, j + 1])
+                    {
+                        secondlayer[i, j] = currentnumber;
+                        secondlayer[i, j + 1] = currentnumber;
+                        currentnumber++;
+                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                        if (result.Cast<int>().Contains(0))
+                        {
+
+                            secondlayer[i, j] = 0;
+                            secondlayer[i, j + 1] = 0;
+                            currentnumber--;
+                            horizontalTried = true;
+
+                        }
+                        else return result;
+                    }
+                    else horizontalTried = true;
+                }
+                else horizontalTried = true;
+
+                if (i + 1 < firstLayer.GetLength(0) && horizontalTried)
+                {
+                    if (firstLayer[i, j] != firstLayer[i + 1, j])
+                    {
+                        secondlayer[i, j] = currentnumber;
+                        secondlayer[i + 1, j] = currentnumber;
+                        currentnumber++;
+                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                        if (result.Cast<int>().Contains(0))
+                        {
+                            secondlayer[i, j] = 0;
+                            secondlayer[i + 1, j] = 0;
+                        }
+                        return result;
+                    }
+                    else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+                }
+                else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+            }
+            else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
+        }
+
         static bool inputValidator(int[,] array)
         {
             List<int> seenNumbers = new List<int>();
             bool[,] checkedSquares = new bool[array.GetLength(0), array.GetLength(1)];
 
-            for(int i=0; i< array.GetLength(0); i++)
+            for (int i = 0; i < array.GetLength(0); i++)
             {
-                for(int j=0; j<array.GetLength(1); j++)
+                for (int j = 0; j < array.GetLength(1); j++)
                 {
                     if (!checkedSquares[i, j]) //If the square isn't checked
                     {
@@ -22,28 +115,29 @@ namespace BrickworksAssignment
                         if (seenNumbers.Contains(array[i, j])) throw new Exception("Number encountered more than 2 times");
 
                         checkedSquares[i, j] = true;
-                        
-                        if(j + 1 < array.GetLength(1))
+
+                        if (j + 1 < array.GetLength(1))
                             if (array[i, j] == array[i, j + 1])
                             {
                                 checkedSquares[i, j + 1] = true;
-                                seenNumbers.Add(array[i,j]);
+                                seenNumbers.Add(array[i, j]);
                                 checkd = true;
                             }
 
-                        if(i + 1 < array.GetLength(0) && !checkd)
+                        if (i + 1 < array.GetLength(0) && !checkd)
                             if (array[i, j] == array[i + 1, j])
                             {
                                 checkedSquares[i + 1, j] = true;
                                 seenNumbers.Add(array[i, j]);
                             }
-                        else throw new Exception("Something ain't right");
+                            else throw new Exception("Something isn't right with the bricks");
                     }
                 }
             }
 
             return true;
         }
+
         static void drawLayer(int[,] array)
         {
             for (int i = 0; i < array.GetLength(0); i++)
@@ -80,8 +174,8 @@ namespace BrickworksAssignment
                     }
                 }
 
-                if (i == 0) Console.WriteLine("╗"); 
-                else if (array[i, array.GetLength(1)-1] == array[i - 1, array.GetLength(1)-1]) Console.WriteLine("║"); 
+                if (i == 0) Console.WriteLine("╗");
+                else if (array[i, array.GetLength(1) - 1] == array[i - 1, array.GetLength(1) - 1]) Console.WriteLine("║");
                 else Console.WriteLine("╣");
 
                 for (int j = 0; j < array.GetLength(1); j++)
@@ -92,7 +186,7 @@ namespace BrickworksAssignment
                     }
                     else
                     {
-                        if(array[i,j-1] == array[i,j]) Console.Write($"|{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
+                        if (array[i, j - 1] == array[i, j]) Console.Write($"|{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
                         else Console.Write($"║{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
                     }
                 }
@@ -100,7 +194,7 @@ namespace BrickworksAssignment
                 Console.WriteLine("║");
             }
 
-            for(int j=0; j<array.GetLength(1); j++)
+            for (int j = 0; j < array.GetLength(1); j++)
             {
                 if (j == 0) Console.Write("╚══");
                 else
@@ -111,136 +205,6 @@ namespace BrickworksAssignment
             }
 
             Console.WriteLine("╝");
-        }
-        
-
-        static int[,] recursiveMethod(int[,] firstLayer, int[,] secondlayer, int i, int j, int currentnumber)
-        {
-            if (j == firstLayer.GetLength(1)) return recursiveMethod(firstLayer, secondlayer, i + 1, 0, currentnumber); 
-            if (j + 1 == firstLayer.GetLength(1) && i + 1 == firstLayer.GetLength(0)) return secondlayer; 
-            
-
-            if (secondlayer[i, j] == 0)
-            {
-                bool horizontalTried = false;
-                if (j + 1 < firstLayer.GetLength(1)) 
-                {
-                    if (firstLayer[i, j] != firstLayer[i, j + 1]) 
-                    {
-                        secondlayer[i, j] = currentnumber;
-                        secondlayer[i, j + 1] = currentnumber;
-                        currentnumber++;
-                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-                        if (result.Cast<int>().Contains(0))
-                        {
-                            
-                                secondlayer[i, j] = 0;
-                                secondlayer[i, j + 1] = 0;
-                                currentnumber--;
-                                horizontalTried = true;
-                            
-                        }
-                        else return result;
-                    } else horizontalTried = true;
-                } else horizontalTried = true;
-
-                if (i + 1 < firstLayer.GetLength(0) && horizontalTried)
-                {
-                    if (firstLayer[i, j] != firstLayer[i + 1, j])
-                    {
-                        secondlayer[i, j] = currentnumber;
-                        secondlayer[i + 1, j] = currentnumber;
-                        currentnumber++;
-                        int[,] result = recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-                        if (result.Cast<int>().Contains(0))
-                        {
-                            secondlayer[i, j] = 0;
-                            secondlayer[i + 1, j] = 0;
-                        }
-                        return result;
-                    }
-                    else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-                }
-                else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-            }
-            else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-        }
-
-        static void Main(string[] args)
-        {
-            int[] dimension = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
-            int m = dimension[0];
-            int n = dimension[1];
-
-            if (m < 1 || m > 100 || n < 1 || m > 100) throw new IndexOutOfRangeException();
-            int[,] bricks = new int[m,n];
-
-            for (int i = 0; i < m; i++)
-            {
-                int[] line = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
-                for (int j = 0; j < n; j++) bricks[i, j] = line[j];
-            }
-
-            inputValidator(bricks);
-
-            Console.WriteLine();
-
-            drawLayer(bricks);
-
-            int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
-            if (secondLayer2.Cast<int>().Contains(0))
-            {
-                Console.WriteLine(-1);
-            }
-            else drawLayer(secondLayer2);
-           
-        }
-
-        //DepricatedMethods
-
-        static void printArray(int[,] array)
-        {
-            for (int i = 0; i < array.GetLength(0); i++)
-            {
-                for (int j = 0; j < array.GetLength(1); j++)
-                    Console.Write(j == array.GetLength(1) - 1 ? $"{array[i, j]}\n" : $"{array[i, j]} ");
-            }
-        }
-        static int[,] createSecondLayer(int[,] firstLayer)
-        {
-            int[,] secondlayer = new int[firstLayer.GetLength(0), firstLayer.GetLength(1)];
-            int currentnumber = 1;
-            for (int i = 0; i < firstLayer.GetLength(0); i++)
-            {
-                for (int j = 0; j < firstLayer.GetLength(1); j++)
-                {
-                    if (secondlayer[i, j] == 0)
-                    {
-                        bool brickplaced = false;
-                        if (j + 1 < firstLayer.GetLength(1))
-                        {
-                            if (firstLayer[i, j] != firstLayer[i, j + 1])
-                            {
-                                secondlayer[i, j] = currentnumber;
-                                secondlayer[i, j + 1] = currentnumber;
-                                currentnumber++;
-                                brickplaced = true;
-                            }
-                        }
-                        if (i + 1 < firstLayer.GetLength(0) && !brickplaced)
-                        {
-                            if (firstLayer[i, j] != firstLayer[i + 1, j])
-                            {
-                                secondlayer[i, j] = currentnumber;
-                                secondlayer[i + 1, j] = currentnumber;
-                                currentnumber++;
-                            }
-                        }
-                    }
-                }
-            }
-
-            return secondlayer;
         }
     }
 }
