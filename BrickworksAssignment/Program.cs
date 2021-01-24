@@ -10,6 +10,7 @@ namespace BrickworksAssignment
         {
             List<int> seenNumbers = new List<int>();
             bool[,] checkedSquares = new bool[array.GetLength(0), array.GetLength(1)];
+
             for(int i=0; i< array.GetLength(0); i++)
             {
                 for(int j=0; j<array.GetLength(1); j++)
@@ -17,9 +18,11 @@ namespace BrickworksAssignment
                     if (!checkedSquares[i, j]) //If the square isn't checked
                     {
                         bool checkd = false;
+
                         if (seenNumbers.Contains(array[i, j])) throw new Exception("Number encountered more than 2 times");
+
                         checkedSquares[i, j] = true;
-                        //check horizontal
+                        
                         if(j + 1 < array.GetLength(1))
                             if (array[i, j] == array[i, j + 1])
                             {
@@ -27,17 +30,18 @@ namespace BrickworksAssignment
                                 seenNumbers.Add(array[i,j]);
                                 checkd = true;
                             }
-                        //check vertical
+
                         if(i + 1 < array.GetLength(0) && !checkd)
-                            if (array[i, j] == array[i + 1, j]) //runs this check only if the first has failed
+                            if (array[i, j] == array[i + 1, j])
                             {
                                 checkedSquares[i + 1, j] = true;
                                 seenNumbers.Add(array[i, j]);
                             }
-                        else throw new Exception("Something ain't right"); //Both checks have failed
+                        else throw new Exception("Something ain't right");
                     }
                 }
             }
+
             return true;
         }
         static void drawLayer(int[,] array)
@@ -72,11 +76,14 @@ namespace BrickworksAssignment
                             if (a != b && c != x && c == a && x != b) Console.Write("╠══");
                             if (a != b && c == x && c != a && x != b) Console.Write("╩══");
                             if (a == b && c != x && c != a && b != x) Console.Write("╦══");
-
                         }
                     }
                 }
-                if (i == 0) Console.WriteLine("╗"); else if (array[i, array.GetLength(1)-1] == array[i - 1, array.GetLength(1)-1]) Console.WriteLine("║"); else Console.WriteLine("╣");
+
+                if (i == 0) Console.WriteLine("╗"); 
+                else if (array[i, array.GetLength(1)-1] == array[i - 1, array.GetLength(1)-1]) Console.WriteLine("║"); 
+                else Console.WriteLine("╣");
+
                 for (int j = 0; j < array.GetLength(1); j++)
                 {
                     if (j == 0)
@@ -89,8 +96,10 @@ namespace BrickworksAssignment
                         else Console.Write($"║{(array[i, j] < 10 ? $" {array[i, j]}" : $"{array[i, j]}")}");
                     }
                 }
+
                 Console.WriteLine("║");
             }
+
             for(int j=0; j<array.GetLength(1); j++)
             {
                 if (j == 0) Console.Write("╚══");
@@ -100,6 +109,7 @@ namespace BrickworksAssignment
                     else Console.Write("╩══");
                 }
             }
+
             Console.WriteLine("╝");
         }
         
@@ -154,7 +164,6 @@ namespace BrickworksAssignment
                 else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
             }
             else return recursiveMethod(firstLayer, secondlayer, i, j + 1, currentnumber);
-
         }
 
         static void Main(string[] args)
@@ -162,17 +171,22 @@ namespace BrickworksAssignment
             int[] dimension = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
             int m = dimension[0];
             int n = dimension[1];
+
             if (m < 1 || m > 100 || n < 1 || m > 100) throw new IndexOutOfRangeException();
             int[,] bricks = new int[m,n];
+
             for (int i = 0; i < m; i++)
             {
                 int[] line = Console.ReadLine().Trim().Split().Select(int.Parse).ToArray();
                 for (int j = 0; j < n; j++) bricks[i, j] = line[j];
             }
+
             inputValidator(bricks);
+
             Console.WriteLine();
+
             drawLayer(bricks);
-            int[,] secondLayer1 = createSecondLayer(bricks);
+
             int[,] secondLayer2 = recursiveMethod(bricks, new int[m, n], 0, 0, 1);
             if (secondLayer2.Cast<int>().Contains(0))
             {
@@ -181,9 +195,6 @@ namespace BrickworksAssignment
             else drawLayer(secondLayer2);
            
         }
-
-
-
 
         //DepricatedMethods
 
@@ -228,6 +239,7 @@ namespace BrickworksAssignment
                     }
                 }
             }
+
             return secondlayer;
         }
     }
